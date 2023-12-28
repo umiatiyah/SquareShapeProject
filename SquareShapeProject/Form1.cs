@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace SquareShapeProject
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string url = "https://localhost:44343/Color/changeColor/";
+            string url = $"{ConfigurationManager.AppSettings["ColorApi"]}/changeColor";
             StartHttpServer(url, this.textBox1.Text);
         }
     }
