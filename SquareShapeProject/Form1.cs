@@ -39,33 +39,54 @@ namespace SquareShapeProject
             }));
         }
 
-        private void StartHttpServer(string url, string newColor)
+        private async Task StartHttpServer(string url, string newColor)
         {
-            Thread thread = new Thread(async () =>
+            try
             {
-                using (HttpClient httpClient = new HttpClient())
+                HttpClient httpClient = new HttpClient();
+                var jsonObject = JsonConvert.SerializeObject(newColor);
+                var content = new StringContent(jsonObject, Encoding.UTF8, "application/json");
+                HttpResponseMessage httpResponse = await httpClient.PostAsync(url, content).ConfigureAwait(false);
+                if (httpResponse.IsSuccessStatusCode)
                 {
-                    var jsonObject = JsonConvert.SerializeObject(newColor);
-                    var content = new StringContent(jsonObject, Encoding.UTF8, "application/json");
-                    HttpResponseMessage httpResponse = await httpClient.PostAsync(url, content);
-                    if (httpResponse.IsSuccessStatusCode)
-                    {
-                        RecolorSquareShape(newColor);
-                    }
+                    RecolorSquareShape(newColor);
                 }
-            });
-            thread.Start();
+                else
+                {
+                    ShowDialogResult("Bad Request");
+                }
+            }
+            catch
+            {
+                ShowDialogResult("Service Error / Service Off");
+            }
         }
 
+        private void ShowDialogResult(string message)
+        {
+            Form form = new Form();
+            Label label = new Label();
+            form.Text = message;
+            label.Text = message;
+            label.AutoSize = true;
+            form.AutoSize = true;
+            form.StartPosition = FormStartPosition.CenterScreen;
+            form.Controls.Add(label);
+            form.ShowDialog();
+        }
         private void pictureBox1_LoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
             this.BackColor = squareShapeColor;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
-            string url = $"{ConfigurationManager.AppSettings["ColorApi"]}/changeColor";
-            StartHttpServer(url, this.textBox1.Text);
+            string color = this.textBox1.Text;
+            if (!string.IsNullOrEmpty(color))
+            {
+                string url = $"{ConfigurationManager.AppSettings["ColorApi"]}/changeColor";
+                await StartHttpServer(url, this.textBox1.Text);
+            }
         }
     }
 }
