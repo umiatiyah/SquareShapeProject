@@ -47,18 +47,19 @@ namespace SquareShapeProject
                 var jsonObject = JsonConvert.SerializeObject(newColor);
                 var content = new StringContent(jsonObject, Encoding.UTF8, "application/json");
                 HttpResponseMessage httpResponse = await httpClient.PostAsync(url, content).ConfigureAwait(false);
+                string apiResponse = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (httpResponse.IsSuccessStatusCode)
                 {
                     RecolorSquareShape(newColor);
                 }
                 else
                 {
-                    ShowDialogResult("Bad Request");
+                    ShowDialogResult($"Bad Request! {apiResponse}");
                 }
             }
-            catch
+            catch(Exception ex)
             {
-                ShowDialogResult("Service Error / Service Off");
+                ShowDialogResult($"Service Error/Service Off! {ex.Message}");
             }
         }
 
