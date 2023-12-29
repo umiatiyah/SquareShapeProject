@@ -39,12 +39,19 @@ namespace SquareShapeProject
             }));
         }
 
+        public class ColorModel
+        {
+            public string ColorName { get; set; }
+        }
+
         private async Task StartHttpServer(string url, string newColor)
         {
             try
             {
                 HttpClient httpClient = new HttpClient();
-                var jsonObject = JsonConvert.SerializeObject(newColor);
+                ColorModel colorModel = new ColorModel();
+                colorModel.ColorName = newColor;
+                var jsonObject = JsonConvert.SerializeObject(colorModel);
                 var content = new StringContent(jsonObject, Encoding.UTF8, "application/json");
                 HttpResponseMessage httpResponse = await httpClient.PostAsync(url, content).ConfigureAwait(false);
                 string apiResponse = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
