@@ -43,7 +43,10 @@ namespace SquareShapeProject
         {
             public string ColorName { get; set; }
         }
-
+        public class ColorResponse : ColorModel
+        {
+            public string Message { get; set; }
+        }
         private async Task StartHttpServer(string url, string newColor)
         {
             try
@@ -55,9 +58,10 @@ namespace SquareShapeProject
                 var content = new StringContent(jsonObject, Encoding.UTF8, "application/json");
                 HttpResponseMessage httpResponse = await httpClient.PostAsync(url, content).ConfigureAwait(false);
                 string apiResponse = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var res = JsonConvert.DeserializeObject<ColorResponse>(apiResponse);
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    RecolorSquareShape(newColor);
+                    RecolorSquareShape(res.ColorName);
                 }
                 else
                 {
