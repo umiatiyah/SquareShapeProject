@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,10 +19,24 @@ namespace SquareShapeProject
     public partial class Form1 : Form
     {
         private Color squareShapeColor = Color.Green;
+        private string url = $"{ConfigurationManager.AppSettings["ColorApi"]}";
+        private readonly HubConnection _hubConnection;
         public Form1()
         {
             InitializeComponent();
             DrawSquareShape();
+            _hubConnection = new HubConnectionBuilder()
+            .WithUrl($"{url}/colorhub")
+            .Build();
+            _hubConnection.On<string>("ChangeColor", colorRes =>
+            {
+                RecolorSquareShape(colorRes);
+            });
+            Thread thread = new Thread(async () =>
+            {
+                await _hubConnection.StartAsync();
+            });
+            thread.Start();
         }
 
         private void DrawSquareShape()
@@ -96,8 +111,7 @@ namespace SquareShapeProject
             string color = this.textBox1.Text;
             if (!string.IsNullOrEmpty(color))
             {
-                string url = $"{ConfigurationManager.AppSettings["ColorApi"]}/changeColor";
-                await StartHttpServer(url, this.textBox1.Text);
+                await StartHttpServer($"{url}/Color/changeColor", this.textBox1.Text);
             }
         }
     }
